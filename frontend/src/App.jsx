@@ -33,7 +33,7 @@ export default function App() {
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/check-flights",
+        "https://blualarm.onrender.com/check-flights",
         {
           method: "POST",
 
