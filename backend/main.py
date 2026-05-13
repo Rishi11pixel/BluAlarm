@@ -10,6 +10,14 @@ from backend.flight_api import (
 
 from backend.alerts import send_discord_alert
 
+from backend.storage import save_alert
+
+# -----------------------------------
+# Start Scheduler
+# -----------------------------------
+
+import backend.scheduler
+
 
 app = FastAPI()
 
@@ -63,6 +71,28 @@ def home():
 
 def check_flights(data: FlightRequest):
 
+    print("\nCHECK FLIGHTS ENDPOINT HIT\n")
+
+
+    # -----------------------------------
+    # Save Alert
+    # -----------------------------------
+
+    alert_data = {
+        "from_city": data.from_city,
+        "to_city": data.to_city,
+        "travel_date": data.travel_date,
+        "preferred_hour": data.preferred_hour,
+        "flexibility": data.flexibility
+    }
+
+    print("SAVING ALERT:", alert_data)
+
+    save_alert(alert_data)
+
+    print("SAVE ALERT FUNCTION CALLED")
+
+
     # -----------------------------------
     # Cheapest Overall
     # -----------------------------------
@@ -72,6 +102,7 @@ def check_flights(data: FlightRequest):
         data.to_city,
         data.travel_date
     )
+
 
     # -----------------------------------
     # Cheapest Preferred Time
@@ -85,11 +116,17 @@ def check_flights(data: FlightRequest):
         flexibility=data.flexibility
     )
 
+
+    # -----------------------------------
+    # Discord Message
+    # -----------------------------------
+
     message = (
         f"✈ BluAlarm Report\n"
         f"Route: {data.from_city} → {data.to_city}\n"
         f"Date: {data.travel_date}\n\n"
     )
+
 
     # -----------------------------------
     # Overall Flight Data
@@ -159,7 +196,7 @@ def check_flights(data: FlightRequest):
 
 
     # -----------------------------------
-    # Return To Frontend
+    # Return Response
     # -----------------------------------
 
     return {

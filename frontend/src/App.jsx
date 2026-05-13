@@ -13,12 +13,24 @@ export default function App() {
   const [travelDate, setTravelDate] = useState("");
 
   const [loading, setLoading] = useState(false);
+
   const [result, setResult] = useState(null);
 
 
   const handleSubmit = async (e) => {
 
     e.preventDefault();
+
+    // -----------------------------------
+    // Validate Travel Date
+    // -----------------------------------
+
+    if (!travelDate) {
+
+      alert("Please select a travel date.");
+
+      return;
+    }
 
     setLoading(true);
 
@@ -33,7 +45,7 @@ export default function App() {
     try {
 
       const response = await fetch(
-        "https://blualarm.onrender.com/check-flights",
+        "http://127.0.0.1:8000/check-flights",
         {
           method: "POST",
 
@@ -45,16 +57,19 @@ export default function App() {
         }
       );
 
+      console.log("RAW RESPONSE:", response);
+
       const result = await response.json();
 
-      console.log(result);
+      console.log("BACKEND RESULT:", result);
+
       setResult(result);
 
       alert("BluAlarm Activated ✈");
 
     } catch (error) {
 
-      console.error(error);
+      console.error("FETCH ERROR:", error);
 
       alert("Something went wrong.");
 
@@ -268,120 +283,118 @@ export default function App() {
               </button>
 
             </form>
+
+
             {
-  result && (
+              result && (
 
-    <div className="mt-8 space-y-4">
+                <div className="mt-8 space-y-4">
 
-      <div className="border-t border-white/10 pt-6">
+                  <div className="border-t border-white/10 pt-6">
 
-        <h3 className="text-2xl font-bold mb-4">
-          Flight Results ✈
-        </h3>
+                    <h3 className="text-2xl font-bold mb-4">
+                      Flight Results ✈
+                    </h3>
 
-      </div>
-
-
-      {/* OVERALL */}
-
-      {
-        result.overall && (
-
-          <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-5">
-
-            <div className="flex items-center justify-between mb-4">
-
-              <h4 className="text-lg font-semibold text-green-400">
-                💸 Cheapest Overall
-              </h4>
-
-              <span className="text-2xl font-bold">
-                ₹{result.overall.price}
-              </span>
-
-            </div>
-
-            <div className="space-y-2 text-slate-300">
-
-              <p>
-                Airline:
-                <span className="text-white ml-2">
-                  {result.overall.airline}
-                </span>
-              </p>
-
-              <p>
-                Departure:
-                <span className="text-white ml-2">
-                  {result.overall.departure}
-                </span>
-              </p>
-
-              <p>
-                Arrival:
-                <span className="text-white ml-2">
-                  {result.overall.arrival}
-                </span>
-              </p>
-
-            </div>
-
-          </div>
-        )
-      }
+                  </div>
 
 
-      {/* PREFERRED */}
+                  {
+                    result.overall && (
 
-      {
-        result.preferred && (
+                      <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-5">
 
-          <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-5">
+                        <div className="flex items-center justify-between mb-4">
 
-            <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-lg font-semibold text-green-400">
+                            💸 Cheapest Overall
+                          </h4>
 
-              <h4 className="text-lg font-semibold text-blue-400">
-                🕐 Preferred Time Flight
-              </h4>
+                          <span className="text-2xl font-bold">
+                            ₹{result.overall.price}
+                          </span>
 
-              <span className="text-2xl font-bold">
-                ₹{result.preferred.price}
-              </span>
+                        </div>
 
-            </div>
+                        <div className="space-y-2 text-slate-300">
 
-            <div className="space-y-2 text-slate-300">
+                          <p>
+                            Airline:
+                            <span className="text-white ml-2">
+                              {result.overall.airline}
+                            </span>
+                          </p>
 
-              <p>
-                Airline:
-                <span className="text-white ml-2">
-                  {result.preferred.airline}
-                </span>
-              </p>
+                          <p>
+                            Departure:
+                            <span className="text-white ml-2">
+                              {result.overall.departure}
+                            </span>
+                          </p>
 
-              <p>
-                Departure:
-                <span className="text-white ml-2">
-                  {result.preferred.departure}
-                </span>
-              </p>
+                          <p>
+                            Arrival:
+                            <span className="text-white ml-2">
+                              {result.overall.arrival}
+                            </span>
+                          </p>
 
-              <p>
-                Arrival:
-                <span className="text-white ml-2">
-                  {result.preferred.arrival}
-                </span>
-              </p>
+                        </div>
 
-            </div>
+                      </div>
+                    )
+                  }
 
-          </div>
-        )
-      }
 
-    </div>
-  )
-}
+                  {
+                    result.preferred && (
+
+                      <div className="bg-slate-900/60 border border-white/10 rounded-2xl p-5">
+
+                        <div className="flex items-center justify-between mb-4">
+
+                          <h4 className="text-lg font-semibold text-blue-400">
+                            🕐 Preferred Time Flight
+                          </h4>
+
+                          <span className="text-2xl font-bold">
+                            ₹{result.preferred.price}
+                          </span>
+
+                        </div>
+
+                        <div className="space-y-2 text-slate-300">
+
+                          <p>
+                            Airline:
+                            <span className="text-white ml-2">
+                              {result.preferred.airline}
+                            </span>
+                          </p>
+
+                          <p>
+                            Departure:
+                            <span className="text-white ml-2">
+                              {result.preferred.departure}
+                            </span>
+                          </p>
+
+                          <p>
+                            Arrival:
+                            <span className="text-white ml-2">
+                              {result.preferred.arrival}
+                            </span>
+                          </p>
+
+                        </div>
+
+                      </div>
+                    )
+                  }
+
+                </div>
+              )
+            }
 
 
             <div className="mt-8 border-t border-white/10 pt-6 flex items-center justify-between text-sm text-slate-400">
