@@ -61,7 +61,7 @@ export default function App() {
     try {
 
       const response = await fetch(
-        "${process.env.VITE_API_URL}/check-flights",
+        `${import.meta.env.VITE_API_URL}/check-flights`,
         {
           method: "POST",
 
