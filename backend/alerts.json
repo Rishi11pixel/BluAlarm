@@ -1,1 +1,10 @@
-[]
+[
+    {
+        "from_city": "BLR",
+        "to_city": "DEL",
+        "travel_date": "2026-08-01",
+        "preferred_hour": 13,
+        "flexibility": 2,
+        "email": "rgoel0110@gmail.com"
+    }
+]

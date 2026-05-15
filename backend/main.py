@@ -12,6 +12,8 @@ from backend.alerts import send_discord_alert
 
 from backend.storage import save_alert
 
+from backend.email_alerts import send_email_alert
+
 # -----------------------------------
 # Start Scheduler
 # -----------------------------------
@@ -42,12 +44,16 @@ app.add_middleware(
 class FlightRequest(BaseModel):
 
     from_city: str
+
     to_city: str
 
     preferred_hour: int
+
     flexibility: int
 
     travel_date: str
+
+    email: str
 
 
 # -----------------------------------
@@ -83,14 +89,13 @@ def check_flights(data: FlightRequest):
         "to_city": data.to_city,
         "travel_date": data.travel_date,
         "preferred_hour": data.preferred_hour,
-        "flexibility": data.flexibility
+        "flexibility": data.flexibility,
+        "email": data.email
     }
-
-    print("SAVING ALERT:", alert_data)
 
     save_alert(alert_data)
 
-    print("SAVE ALERT FUNCTION CALLED")
+    print("ALERT SAVED")
 
 
     # -----------------------------------
@@ -196,10 +201,25 @@ def check_flights(data: FlightRequest):
 
 
     # -----------------------------------
+    # Send Premium HTML Email
+    # -----------------------------------
+
+    send_email_alert(
+        receiver_email=data.email,
+        subject="✈ BluAlarm Flight Intelligence",
+        overall=overall_data,
+        preferred=preferred_data,
+        route=f"{data.from_city} → {data.to_city}",
+        travel_date=data.travel_date
+    )
+
+
+    # -----------------------------------
     # Return Response
     # -----------------------------------
 
     return {
+
         "status": "success",
 
         "route": f"{data.from_city} → {data.to_city}",
