@@ -23,6 +23,65 @@ export default function App() {
 
   const [success, setSuccess] = useState(false);
 
+  const isValidDateParts = (year, month, day) => {
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    return (
+      date.getUTCFullYear() === year
+      && date.getUTCMonth() === month - 1
+      && date.getUTCDate() === day
+    );
+  };
+
+  const normalizeTravelDate = (rawDate) => {
+    if (!rawDate) {
+      return "";
+    }
+
+    const cleaned = rawDate.trim().replace(/[./]/g, "-");
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) {
+      const [yearStr, monthStr, dayStr] = cleaned.split("-");
+      const year = Number(yearStr);
+      const month = Number(monthStr);
+      const day = Number(dayStr);
+
+      if (isValidDateParts(year, month, day)) {
+        return `${yearStr}-${monthStr}-${dayStr}`;
+      }
+
+      return "";
+    }
+
+    if (/^\d{2}-\d{2}-\d{4}$/.test(cleaned)) {
+      const [firstStr, secondStr, yearStr] = cleaned.split("-");
+      const first = Number(firstStr);
+      const second = Number(secondStr);
+      const year = Number(yearStr);
+
+      if (year < 1900 || year > 2100) {
+        return "";
+      }
+
+      let day = first;
+      let month = second;
+
+      // If the second segment can't be month, treat as MM-DD-YYYY.
+      if (second > 12 && first <= 12) {
+        day = second;
+        month = first;
+      }
+
+      if (!isValidDateParts(year, month, day)) {
+        return "";
+      }
+
+      return `${yearStr}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    }
+
+    return "";
+  };
+
 
   const handleSubmit = async (e) => {
 
@@ -32,8 +91,10 @@ export default function App() {
     setSuccess(false);
 
     // Validation
-    if (!travelDate) {
-      setError("Please select a travel date.");
+    const normalizedTravelDate = normalizeTravelDate(travelDate);
+
+    if (!normalizedTravelDate) {
+      setError("Please enter a valid date (dd-mm-yyyy, mm-dd-yyyy, or yyyy-mm-dd).");
       return;
     }
 
@@ -55,7 +116,7 @@ export default function App() {
       email: email,
       preferred_hour: Number(preferredHour),
       flexibility: Number(flexibility),
-      travel_date: travelDate
+      travel_date: normalizedTravelDate
     };
 
     try {
@@ -369,11 +430,17 @@ export default function App() {
                   </label>
 
                   <input
-                    type="date"
+                    type="text"
                     value={travelDate}
                     onChange={(e) => setTravelDate(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white group-hover:bg-white/10 group-hover:border-blue-500/40"
+                    placeholder="dd-mm-yyyy"
+                    inputMode="numeric"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-slate-400 group-hover:bg-white/10 group-hover:border-blue-500/40"
                   />
+
+                  <p className="mt-2 text-xs text-slate-400">
+                    Accepted: dd-mm-yyyy, mm-dd-yyyy, yyyy-mm-dd
+                  </p>
 
                 </div>
 
