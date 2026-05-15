@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FiArrowRight, FiCheck, FiAlertCircle } from "react-icons/fi";
+import { FiArrowRight, FiCheck, FiAlertCircle, FiCalendar } from "react-icons/fi";
 
 export default function App() {
 
@@ -23,65 +23,6 @@ export default function App() {
 
   const [success, setSuccess] = useState(false);
 
-  const isValidDateParts = (year, month, day) => {
-    const date = new Date(Date.UTC(year, month - 1, day));
-
-    return (
-      date.getUTCFullYear() === year
-      && date.getUTCMonth() === month - 1
-      && date.getUTCDate() === day
-    );
-  };
-
-  const normalizeTravelDate = (rawDate) => {
-    if (!rawDate) {
-      return "";
-    }
-
-    const cleaned = rawDate.trim().replace(/[./]/g, "-");
-
-    if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) {
-      const [yearStr, monthStr, dayStr] = cleaned.split("-");
-      const year = Number(yearStr);
-      const month = Number(monthStr);
-      const day = Number(dayStr);
-
-      if (isValidDateParts(year, month, day)) {
-        return `${yearStr}-${monthStr}-${dayStr}`;
-      }
-
-      return "";
-    }
-
-    if (/^\d{2}-\d{2}-\d{4}$/.test(cleaned)) {
-      const [firstStr, secondStr, yearStr] = cleaned.split("-");
-      const first = Number(firstStr);
-      const second = Number(secondStr);
-      const year = Number(yearStr);
-
-      if (year < 1900 || year > 2100) {
-        return "";
-      }
-
-      let day = first;
-      let month = second;
-
-      // If the second segment can't be month, treat as MM-DD-YYYY.
-      if (second > 12 && first <= 12) {
-        day = second;
-        month = first;
-      }
-
-      if (!isValidDateParts(year, month, day)) {
-        return "";
-      }
-
-      return `${yearStr}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    }
-
-    return "";
-  };
-
 
   const handleSubmit = async (e) => {
 
@@ -91,10 +32,8 @@ export default function App() {
     setSuccess(false);
 
     // Validation
-    const normalizedTravelDate = normalizeTravelDate(travelDate);
-
-    if (!normalizedTravelDate) {
-      setError("Please enter a valid date (dd-mm-yyyy, mm-dd-yyyy, or yyyy-mm-dd).");
+    if (!travelDate) {
+      setError("Please select your travel date from the calendar.");
       return;
     }
 
@@ -116,7 +55,7 @@ export default function App() {
       email: email,
       preferred_hour: Number(preferredHour),
       flexibility: Number(flexibility),
-      travel_date: normalizedTravelDate
+      travel_date: travelDate
     };
 
     try {
@@ -135,7 +74,19 @@ export default function App() {
       );
 
       if (!response.ok) {
-        throw new Error(`Server error: ${response.statusText}`);
+        let serverMessage = `Server error: ${response.statusText}`;
+
+        try {
+          const errorBody = await response.json();
+
+          if (errorBody?.detail) {
+            serverMessage = errorBody.detail;
+          }
+        } catch {
+          // Keep fallback message when response body is not JSON.
+        }
+
+        throw new Error(serverMessage);
       }
 
       const result = await response.json();
@@ -147,7 +98,7 @@ export default function App() {
 
       console.error("FETCH ERROR:", error);
 
-      setError("Failed to activate alarm. Please try again.");
+      setError(error.message || "Failed to activate alarm. Please try again.");
 
     } finally {
 
@@ -429,17 +380,20 @@ export default function App() {
                     TRAVEL DATE
                   </label>
 
-                  <input
-                    type="text"
-                    value={travelDate}
-                    onChange={(e) => setTravelDate(e.target.value)}
-                    placeholder="dd-mm-yyyy"
-                    inputMode="numeric"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-slate-400 group-hover:bg-white/10 group-hover:border-blue-500/40"
-                  />
+                  <div className="relative">
+                    <FiCalendar className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+
+                    <input
+                      type="date"
+                      value={travelDate}
+                      onChange={(e) => setTravelDate(e.target.value)}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3.5 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-white placeholder-slate-400 group-hover:bg-white/10 group-hover:border-blue-500/40"
+                    />
+                  </div>
 
                   <p className="mt-2 text-xs text-slate-400">
-                    Accepted: dd-mm-yyyy, mm-dd-yyyy, yyyy-mm-dd
+                    Date display follows device locale, but BluAlarm sends it safely in backend format.
                   </p>
 
                 </div>

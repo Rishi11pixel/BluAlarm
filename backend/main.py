@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import HTTPException
 
 from pydantic import BaseModel
+from datetime import datetime
 
 from backend.flight_api import (
     get_cheapest_flight,
@@ -56,6 +58,41 @@ class FlightRequest(BaseModel):
     email: str
 
 
+def normalize_travel_date(raw_date: str) -> str:
+
+    if not raw_date:
+
+        raise HTTPException(
+            status_code=422,
+            detail="Travel date is required."
+        )
+
+    cleaned = raw_date.strip().replace("/", "-").replace(".", "-")
+
+    accepted_formats = [
+        "%Y-%m-%d",
+        "%d-%m-%Y",
+        "%m-%d-%Y"
+    ]
+
+    for date_format in accepted_formats:
+
+        try:
+
+            parsed = datetime.strptime(cleaned, date_format)
+
+            return parsed.strftime("%Y-%m-%d")
+
+        except ValueError:
+
+            continue
+
+    raise HTTPException(
+        status_code=422,
+        detail="Invalid travel date format. Use calendar picker or valid date."
+    )
+
+
 # -----------------------------------
 # Root Route
 # -----------------------------------
@@ -79,6 +116,8 @@ def check_flights(data: FlightRequest):
 
     print("\nCHECK FLIGHTS ENDPOINT HIT\n")
 
+    normalized_travel_date = normalize_travel_date(data.travel_date)
+
 
     # -----------------------------------
     # Save Alert
@@ -87,7 +126,7 @@ def check_flights(data: FlightRequest):
     alert_data = {
         "from_city": data.from_city,
         "to_city": data.to_city,
-        "travel_date": data.travel_date,
+        "travel_date": normalized_travel_date,
         "preferred_hour": data.preferred_hour,
         "flexibility": data.flexibility,
         "email": data.email
@@ -105,7 +144,7 @@ def check_flights(data: FlightRequest):
     overall = get_cheapest_flight(
         data.from_city,
         data.to_city,
-        data.travel_date
+        normalized_travel_date
     )
 
 
@@ -116,7 +155,7 @@ def check_flights(data: FlightRequest):
     preferred = get_cheapest_in_time_range(
         data.from_city,
         data.to_city,
-        data.travel_date,
+        normalized_travel_date,
         preferred_hour=data.preferred_hour,
         flexibility=data.flexibility
     )
@@ -129,7 +168,7 @@ def check_flights(data: FlightRequest):
     message = (
         f"✈ BluAlarm Report\n"
         f"Route: {data.from_city} → {data.to_city}\n"
-        f"Date: {data.travel_date}\n\n"
+        f"Date: {normalized_travel_date}\n\n"
     )
 
 
@@ -210,7 +249,7 @@ def check_flights(data: FlightRequest):
         overall=overall_data,
         preferred=preferred_data,
         route=f"{data.from_city} → {data.to_city}",
-        travel_date=data.travel_date
+        travel_date=normalized_travel_date
     )
 
 
@@ -224,7 +263,7 @@ def check_flights(data: FlightRequest):
 
         "route": f"{data.from_city} → {data.to_city}",
 
-        "travel_date": data.travel_date,
+        "travel_date": normalized_travel_date,
 
         "overall": overall_data,
 
