@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { FiArrowRight, FiCheck, FiAlertCircle, FiCalendar } from "react-icons/fi";
 
+const logoUrl = "/BluAlarm_logo.png";
+
 export default function App() {
 
   const [fromCity, setFromCity] = useState("DEL");
@@ -129,6 +131,16 @@ export default function App() {
             
             {/* Main Card */}
             <div className="relative bg-gradient-to-br from-white/10 to-white/5 border border-white/15 backdrop-blur-2xl rounded-3xl p-16 shadow-2xl">
+
+              <div className="flex justify-center mb-8">
+                <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/20 px-4 py-2 shadow-lg shadow-cyan-500/10">
+                  <img src={logoUrl} alt="BluAlarm logo" className="h-10 w-10 rounded-full object-cover ring-1 ring-white/10" />
+                  <div className="text-left leading-tight">
+                    <p className="text-sm font-semibold text-white">BluAlarm</p>
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">Analyzing flight intel</p>
+                  </div>
+                </div>
+              </div>
               
               {/* Microscope with Airplane */}
               <div className="flex justify-center mb-12">
@@ -220,12 +232,21 @@ export default function App() {
           <div className="space-y-8 animate-fade-in text-center">
 
             <div className="inline-flex items-center gap-3 px-4 py-3 rounded-full border border-blue-400/40 bg-gradient-to-r from-blue-500/15 to-cyan-500/10 text-blue-200 text-sm backdrop-blur-md hover:border-blue-400/60 transition-all duration-300 mx-auto">
+              <img src={logoUrl} alt="BluAlarm logo" className="h-6 w-6 rounded-full object-cover ring-1 ring-white/10" />
               <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
               Smart Flight Tracking Platform
             </div>
 
 
             <div className="space-y-4">
+
+              <div className="flex justify-center">
+                <img
+                  src={logoUrl}
+                  alt="BluAlarm logo"
+                  className="h-24 w-24 rounded-3xl object-cover shadow-2xl shadow-blue-500/20 ring-1 ring-white/10"
+                />
+              </div>
 
               <h1 className="text-8xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-200 via-blue-100 to-cyan-200 leading-tight tracking-tighter">
                 Blu<span className="text-blue-300">Alarm</span>
@@ -572,7 +593,10 @@ export default function App() {
 
         <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
 
-          <p>✈ Powered by SerpAPI & Advanced Flight Tracking</p>
+          <div className="flex items-center gap-3">
+            <img src={logoUrl} alt="BluAlarm logo" className="h-8 w-8 rounded-full object-cover ring-1 ring-white/10" />
+            <p>✈ Powered by SerpAPI & Advanced Flight Tracking</p>
+          </div>
 
           <div className="flex items-center gap-6">
             <a href="#" className="hover:text-slate-300 transition-colors">Documentation</a>

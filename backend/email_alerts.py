@@ -1,3 +1,4 @@
+import base64
 import smtplib
 import os
 
@@ -18,6 +19,21 @@ EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 
+def get_logo_data_uri():
+
+    logo_path = Path(__file__).resolve().parent.parent / "frontend" / "public" / "BluAlarm_logo.png"
+
+    if not logo_path.exists():
+
+        return ""
+
+    with open(logo_path, "rb") as logo_file:
+
+        encoded_logo = base64.b64encode(logo_file.read()).decode("utf-8")
+
+    return f"data:image/png;base64,{encoded_logo}"
+
+
 def send_email_alert(
     receiver_email,
     subject,
@@ -28,6 +44,8 @@ def send_email_alert(
 ):
 
     try:
+
+        logo_data_uri = get_logo_data_uri()
 
         # -----------------------------------
         # HTML EMAIL TEMPLATE
@@ -69,6 +87,16 @@ def send_email_alert(
                 padding:40px 32px;
                 border-bottom:1px solid rgba(255,255,255,0.03);
             ">
+
+                <div style="margin-bottom:18px;">
+                    <img
+                        src="{logo_data_uri}"
+                        alt="BluAlarm"
+                        width="64"
+                        height="64"
+                        style="display:block;border-radius:16px;object-fit:cover;border:1px solid rgba(255,255,255,0.08);box-shadow:0 12px 30px rgba(0,0,0,0.25);"
+                    />
+                </div>
 
                 <div style="
                     font-size:11px;
